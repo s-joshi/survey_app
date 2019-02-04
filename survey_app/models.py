@@ -23,7 +23,10 @@ class Employee(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.emp_id, "---", self.name
+        return str(self.emp_id)+"---"+str(self.name)
+
+    class Meta:
+        verbose_name_plural = 'Employees'
 
 
 class QuestionLibrary(models.Model):
@@ -32,13 +35,17 @@ class QuestionLibrary(models.Model):
     """
     question_text = models.TextField()
 
-    CHOICES = ((1, 'comment_box'), (2, 'single_row_text'),
-               (3, 'Numeric_input'), (4, 'email_qns'))
+    CHOICES = (('comment_box', 'comment_box'),
+               ('single_row_text', 'single_row_text'),
+               ('Numeric_input', 'Numeric_input'), ('email_qns', 'email_qns'))
 
     question_type = models.CharField(max_length=50, choices=CHOICES, default=1)
 
     def __str__(self):
         return self.question_text
+
+    class Meta:
+        verbose_name_plural = 'Question Library'
 
 
 class ChoiceAnswer(models.Model):
@@ -62,3 +69,32 @@ class Survey(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SurveyQuestion(models.Model):
+    """
+    mapping of survey and questions.
+    """
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    question = models.ForeignKey(QuestionLibrary, on_delete=models.CASCADE)
+
+
+class SurveyEmployee(models.Model):
+    """
+    mapping of Employee and survey.
+    """
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+
+
+class SurveyResponse(models.Model):
+    """
+    Model to keep track of ans given by users.
+    """
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    question_id = models.ForeignKey(QuestionLibrary, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=256)
+
+    class Meta:
+        unique_together = (('survey', 'question_id'),)
